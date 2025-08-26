@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice	xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"	xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"	xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"	xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+	<cbc:ProfileID>reporting:1.0</cbc:ProfileID>
+	<cbc:ID BindValue="IENV_TABLE_SERIAL_ID">GIG001</cbc:ID>
+	<cbc:UUID BindValue="IENV_UUID">0043e15e-740b-4e1b-889d-8504afdb1d1d</cbc:UUID>
+	<cbc:IssueDate BindValue="IENV_DATE">2023-08-06</cbc:IssueDate>
+	<cbc:InvoiceTypeCode name="011">388</cbc:InvoiceTypeCode>
+	<cbc:Note BindValue="IENV_NOTE">Test INV</cbc:Note>
+	<cbc:DocumentCurrencyCode>JOD</cbc:DocumentCurrencyCode>
+	<cbc:TaxCurrencyCode>JOD</cbc:TaxCurrencyCode>
+	<cac:AdditionalDocumentReference>
+		<cbc:ID>ICV</cbc:ID>
+		<cbc:UUID BindValue="ID">1</cbc:UUID>
+	</cac:AdditionalDocumentReference>
+	<cac:AccountingSupplierParty>
+		<cac:Party>
+			<cac:PostalAddress>
+				<cac:Country>
+					<cbc:IdentificationCode>JO</cbc:IdentificationCode>
+				</cac:Country>
+			</cac:PostalAddress>
+			<cac:PartyTaxScheme>
+				<cbc:CompanyID BindValue="IENV_COMPANY_COMMERCIAL_NUMBER">2222222</cbc:CompanyID>
+				<cac:TaxScheme>
+					<cbc:ID>VAT</cbc:ID>
+				</cac:TaxScheme>
+			</cac:PartyTaxScheme>
+			<cac:PartyLegalEntity>
+				<cbc:RegistrationName BindValue="IENV_COMPANY_NAME">مجموعة الخل</cbc:RegistrationName>
+			</cac:PartyLegalEntity>
+		</cac:Party>
+	</cac:AccountingSupplierParty>
+	<cac:AccountingCustomerParty>
+		<cac:Party>
+			<cac:PartyIdentification>
+				<cbc:ID schemeID="TN"  BindValue="IENV_COMMERCIAL_NUMBER">33445544</cbc:ID>
+			</cac:PartyIdentification>
+			<cac:PostalAddress>
+				<cbc:PostalZone BindValue="IENV_POSTAL_CODE">33554</cbc:PostalZone>
+				<cbc:CountrySubentityCode BindValue="IENV_FAWTARA_CITY_NAME">JO-AZ</cbc:CountrySubentityCode>
+				<cac:Country>
+					<cbc:IdentificationCode>JO</cbc:IdentificationCode>
+				</cac:Country>
+			</cac:PostalAddress>
+			<cac:PartyTaxScheme>
+				<cbc:CompanyID BindValue="IENV_COMMERCIAL_NUMBER">33445544</cbc:CompanyID>
+				<cac:TaxScheme>
+					<cbc:ID>VAT</cbc:ID>
+				</cac:TaxScheme>
+			</cac:PartyTaxScheme>
+			<cac:PartyLegalEntity>
+				<cbc:RegistrationName BindValue="IENV_CUSTOMER_NAME">امجد سليمان</cbc:RegistrationName>
+			</cac:PartyLegalEntity>
+		</cac:Party>
+		<cac:AccountingContact>
+			<cbc:Telephone BindValue="IENV_CUSTOMER_PHONE">324323434</cbc:Telephone>
+		</cac:AccountingContact>
+	</cac:AccountingCustomerParty>
+	<cac:SellerSupplierParty>
+		<cac:Party>
+			<cac:PartyIdentification>
+				<cbc:ID  BindValue="IENV_Activity_Number">22222222</cbc:ID>
+			</cac:PartyIdentification>
+		</cac:Party>
+	</cac:SellerSupplierParty>
+	<cac:AllowanceCharge>
+		<cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+		<cbc:AllowanceChargeReason>discount</cbc:AllowanceChargeReason>
+		<cbc:Amount currencyID="JO">0.00</cbc:Amount>
+	</cac:AllowanceCharge>
+	<cac:TaxTotal>
+		<cbc:TaxAmount currencyID="JO">0.00</cbc:TaxAmount>
+	</cac:TaxTotal>
+	<cac:LegalMonetaryTotal>
+		<cbc:TaxExclusiveAmount currencyID="JO" BindValue="IENV_TOTAL_AMT_WITHOUT_DISCOUNT">64.00</cbc:TaxExclusiveAmount>
+		<cbc:TaxInclusiveAmount currencyID="JO" BindValue="IENV_TOTAL_AMT_WITHOUT_DISCOUNT">64.00</cbc:TaxInclusiveAmount>
+		<cbc:AllowanceTotalAmount currencyID="JO">0</cbc:AllowanceTotalAmount>
+		<cbc:PayableAmount currencyID="JO" BindValue="IENV_TOTAL_INVOICE">64.00</cbc:PayableAmount>
+	</cac:LegalMonetaryTotal>
+	<cac:InvoiceLine>
+		<cbc:ID BindValue="IENV_ID">1</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="PCE" BindValue="IENV_PCE">1.00</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="JO" BindValue="IENV_TOTAL_LINE_EXTENSION">64.00</cbc:LineExtensionAmount>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="JO" >0.00</cbc:TaxAmount>
+			<cbc:RoundingAmount currencyID="JO" BindValue="IENV_ROUNDING_AMOUNT">64.00</cbc:RoundingAmount>
+			<cac:TaxSubtotal>
+				<cbc:TaxAmount currencyID="JO">0.00</cbc:TaxAmount>
+				<cac:TaxCategory>
+					<cbc:ID schemeAgencyID="6" schemeID="UN/ECE 5305">Z</cbc:ID>
+					<cbc:Percent>0.00</cbc:Percent>
+					<cac:TaxScheme>
+						<cbc:ID schemeAgencyID="6" schemeID="UN/ECE 5153">VAT</cbc:ID>
+					</cac:TaxScheme>
+				</cac:TaxCategory>
+			</cac:TaxSubtotal>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Name BindValue="INEV_ITEM_NAME">زهره</cbc:Name>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="JO" BindValue="IENV_PRICE_AMOUNT">64.00</cbc:PriceAmount>
+			<cac:AllowanceCharge>
+				<cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+				<cbc:AllowanceChargeReason>DISCOUNT</cbc:AllowanceChargeReason>
+				<cbc:Amount currencyID="JO">0.00</cbc:Amount>
+			</cac:AllowanceCharge>
+		</cac:Price>
+	</cac:InvoiceLine>
+</Invoice>

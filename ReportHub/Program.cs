@@ -1,5 +1,3 @@
-using ReportHub.Common.Authentication; 
-using ReportHub.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
@@ -7,11 +5,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OfficeOpenXml;
+using ReportHub.Common.Authentication; 
+using ReportHub.Common.Base;
+using ReportHub.Common.Helper.DataHelpers;
+using ReportHub.Common.Helper.DataHelpers.IDataHelpers;
+using ReportHub.Middlewares;
 using Swashbuckle.AspNetCore.Filters;
 using System.Data;
 using System.Data.SqlClient;
 using System.Text;
-using ReportHub.Common.Base;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -93,7 +95,6 @@ builder.Services.AddCors(options =>
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.AddOptions();
-
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -111,6 +112,7 @@ builder.Services.AddControllersWithViews()
     .AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
 );
+
 
 var app = builder.Build();
 

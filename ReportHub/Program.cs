@@ -9,6 +9,7 @@ using ReportHub.Common.Authentication;
 using ReportHub.Common.Base;
 using ReportHub.Common.Helper.DataHelpers;
 using ReportHub.Common.Helper.DataHelpers.IDataHelpers;
+using ReportHub.Common.Helper.GeneratorHelper;
 using ReportHub.Middlewares;
 using Swashbuckle.AspNetCore.Filters;
 using System.Data;
@@ -33,20 +34,13 @@ builder.Services.AddEndpointsApiExplorer();
 
 ReportHub.Common.Base.ServiceCollectionExtensions.RepositroyScoped(builder.Services);
 ReportHub.Common.Base.CustomServiceCollectionExtensions.RepositroyScoped(builder.Services);
-
-//builder.Services.AddDbContext<LogisticsSales.DataAccess.Base.LogisticsSalesContext>(options =>
-//{
-//    options.UseSqlServer(builder.Configuration.GetConnectionString("LogisticsSalesDB"));
-//});
-
-
-//builder.Services.AddTransient<IDbConnection>((sp) => new SqlConnection(builder.Configuration.GetConnectionString("DappereSchoolImageDB")));
-
+ReportHub.Common.Base.ReportServiceCollectionExtensions.AddReportGeneration(builder.Services);
+ 
 
 
 builder.Services.AddHttpContextAccessor();
 
-
+ 
 
 
 builder.Services.AddSwaggerGen(setup =>

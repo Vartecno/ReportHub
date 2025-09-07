@@ -26,10 +26,11 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.2" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Reports\Logistics\" />
-    <Folder Include="Reports\Accounting\" />
-    <Folder Include="Reports\Core\" />
-    <Folder Include="Reports\VarFlow-SMS\" />
+    <Folder Include="ReportGenerationService\" />
+    <Folder Include="Report\Logistics\" />
+    <Folder Include="Report\Accounting\" />
+    <Folder Include="Report\Core\" />
+    <Folder Include="Report\VarFlow-SMS\" />
     <Folder Include="wwwroot\Reports\" />
   </ItemGroup>
   <ItemGroup>

@@ -43,6 +43,18 @@ namespace ReportHub.Common.Configuration
         }
 
         /// <summary>
+        /// Add core ReportHub services to the DI container
+        /// </summary>
+        public static IServiceCollection AddReportServices(this IServiceCollection services)
+        {
+            // Register core ReportHub services
+            // Add any additional services that are specific to ReportHub functionality
+            // This method can be expanded as needed for future services
+            
+            return services;
+        }
+
+        /// <summary>
         /// Configure and initialize the template engine with all registered templates
         /// </summary>
         public static IServiceProvider ConfigureTemplateEngine(this IServiceProvider serviceProvider)

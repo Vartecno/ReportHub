@@ -127,19 +127,20 @@ namespace ReportHub.Common.Services
                                     column.Item().PaddingTop(10).Row(row =>
                                     {
                                         row.RelativeItem().Text($"Generated on: {request.Configuration.GeneratedDate:dd/MM/yyyy HH:mm}")
-                                            .FontSize(request.Branding.Typography.SmallSize)
-                                            .FontColor(Colors.Grey.Medium);
+                                            .FontSize(request.Branding.Typography.SmallSize);
 
                                         if (request.Configuration.IncludePageNumbers)
                                         {
-                                            row.ConstantItem(100).AlignRight().Text(text =>
+                                            row.ConstantItem(100).AlignRight().Column(pageColumn =>
                                             {
-                                                text.CurrentPageNumber();
-                                                text.Span(" / ");
-                                                text.TotalPages();
-                                            })
-                                            .FontSize(request.Branding.Typography.SmallSize)
-                                            .FontColor(Colors.Grey.Medium);
+                                                pageColumn.Item().Text(text =>
+                                                {
+                                                    text.DefaultTextStyle(style => style.FontSize(request.Branding.Typography.SmallSize));
+                                                    text.CurrentPageNumber();
+                                                    text.Span(" / ");
+                                                    text.TotalPages();
+                                                });
+                                            });
                                         }
                                     });
                                 });

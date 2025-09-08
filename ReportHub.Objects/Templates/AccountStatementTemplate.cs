@@ -1,254 +1,147 @@
-using QuestPDF.Infrastructure;
 using QuestPDF.Fluent;
-using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using ReportHub.Objects.DTOs;
 using ReportHub.Objects.Interfaces;
-using Colors = QuestPDF.Helpers.Colors;
+using System;
 
 namespace ReportHub.Objects.Templates
 {
-    /// <summary>
-    /// Template for Account Statement reports
-    /// Matches the layout of the second PDF sample
-    /// </summary>
     public class AccountStatementTemplate : BaseReportTemplate
     {
         public override string TemplateId => "account_statement";
         public override string DisplayName => "Account Statement";
-        public override string Description => "Professional account statement template for financial transactions";
+        public override string Description => "Template for generating account statement reports with transaction history";
         public override Type[] SupportedDataTypes => new[] { typeof(AccountStatementDataDTO) };
 
         public override void GenerateContent(IContainer container, TemplateReportRequestDTO request)
         {
-            var statementData = ParseTemplateData<AccountStatementDataDTO>(request.Data);
-            if (statementData == null)
-                throw new ArgumentException("Invalid data format for AccountStatementTemplate");
-
-            container.Column(column =>
-                {
-                    // Header Section
-                    column.Item().PaddingBottom(20).Element(headerContainer => 
-                        RenderStatementHeader(headerContainer, request.Branding, statementData.Header));
-
-                    // Statement Title (centered)
-                    column.Item().PaddingBottom(15).AlignCenter().Text("Account Statements")
-                        .FontSize(18).SemiBold().FontColor(request.Branding.Colors.Primary);
-
-                    // Date Range
-                    column.Item().PaddingBottom(15).Text($"From Date: {FormatDate(statementData.Header.FromDate)} To Date: {FormatDate(statementData.Header.ToDate)}")
-                        .FontSize(request.Branding.Typography.BodySize);
-
-                    // Transactions Table
-                    if (statementData.Transactions?.Any() == true)
-                    {
-                        column.Item().PaddingBottom(15).Element(transactionsContainer => 
-                            RenderTransactionsTable(transactionsContainer, statementData.Transactions, request.Branding));
-                    }
-
-                    // Summary Section
-                    if (statementData.Summary != null)
-                    {
-                        column.Item().PaddingBottom(15).Element(summaryContainer => 
-                            RenderSummary(summaryContainer, statementData.Summary, request.Branding));
-                    }
-
-                    // Footer with contact information
-                    column.Item().Element(footerContainer => 
-                        RenderContactFooter(footerContainer, request.Branding));
-                });
-        }
-        }
-
-        private void RenderStatementHeader(IContainer container, ReportBrandingDTO branding, StatementHeaderDTO header)
-        {
+            var data = ParseTemplateData<AccountStatementDataDTO>(request.Data);
+            if (data == null) return;
+            
             container.Column(column =>
             {
-                // City and Company Name
-                if (!string.IsNullOrWhiteSpace(branding.Company.City))
-                {
-                    column.Item().Text(branding.Company.City)
-                        .FontSize(branding.Typography.BodySize);
-                }
+                // Render company header using branding
+                column.Item().Element(headerContainer => RenderCompanyHeader(headerContainer, request.Branding));
+                
+                column.Item().PaddingVertical(20).LineHorizontal(1);
 
-                column.Item().PaddingTop(5).Row(row =>
+                // Statement Header
+                column.Item().Row(row =>
                 {
-                    // Logo section
-                    if (!string.IsNullOrWhiteSpace(branding.Logo))
+                    row.RelativeItem().Column(headerColumn =>
                     {
-                        row.ConstantItem(120).Element(logoContainer => RenderLogo(logoContainer, branding.Logo, 120, 60));
-                        row.RelativeItem().PaddingLeft(15);
-                    }
-                    else
-                    {
-                        row.RelativeItem();
-                    }
-
-                    // Company name
-                    row.RelativeItem().Column(nameColumn =>
-                    {
-                        nameColumn.Item().Text(branding.Company.Name)
-                            .FontSize(14).SemiBold();
+                        headerColumn.Item().Text("ACCOUNT STATEMENT")
+                            .FontSize(request.Branding.Typography.HeaderSize)
+                            .Bold();
+                            
+                        headerColumn.Item().PaddingTop(5).Text($"Account: {data.Header.AccountName}")
+                            .FontSize(request.Branding.Typography.BodySize);
+                            
+                        headerColumn.Item().Text($"Account No: {data.Header.AccountNumber}")
+                            .FontSize(request.Branding.Typography.BodySize);
+                            
+                        headerColumn.Item().Text($"Period: {FormatDate(data.Header.FromDate, request.Configuration.Culture)} - {FormatDate(data.Header.ToDate, request.Configuration.Culture)}")
+                            .FontSize(request.Branding.Typography.BodySize);
                     });
                 });
-            });
-        }
 
-        private void RenderTransactionsTable(IContainer container, List<TransactionDTO> transactions, ReportBrandingDTO branding)
-        {
-            container.Table(table =>
-            {
-                table.ColumnsDefinition(columns =>
-                {
-                    columns.ConstantColumn(80);   // Date
-                    columns.ConstantColumn(100);  // Account No
-                    columns.RelativeColumn(2);    // Account Name
-                    columns.RelativeColumn(2);    // Notes
-                    columns.ConstantColumn(120);  // Supplier Invoice No
-                    columns.ConstantColumn(100);  // Invoice No
-                    columns.ConstantColumn(100);  // Reference
-                    columns.ConstantColumn(100);  // Debit
-                    columns.ConstantColumn(100);  // Credit
-                    columns.ConstantColumn(100);  // Balance
-                });
+                column.Item().PaddingVertical(20);
 
-                // Header row - concatenated style from original
-                table.Cell().ColumnSpan(10).Background(branding.Colors.Primary).Padding(5)
-                    .Text("DateAccount NoAccountNameNotesSupplier Invoice NoInvoice No.ReferenceDebitCreditBalance")
-                    .FontSize(10).SemiBold().FontColor(Colors.White);
-
-                // Data rows
-                for (int i = 0; i < transactions.Count; i++)
-                {
-                    var transaction = transactions[i];
-                    var isEvenRow = i % 2 == 0;
-                    var bgColor = isEvenRow ? Colors.White : Colors.Grey.Lighten4;
-
-                    // Date
-                    table.Cell().Background(bgColor).Padding(3)
-                        .Text(FormatDate(transaction.Date)).FontSize(9);
-
-                    // Account fields - simplified for demo
-                    table.Cell().Background(bgColor).Padding(3)
-                        .Text(transaction.AdditionalFields.GetValueOrDefault("AccountNo", "").ToString()).FontSize(9);
+                // Account Summary
+                column.Item().Text("ACCOUNT SUMMARY")
+                    .FontSize(request.Branding.Typography.BodySize)
+                    .SemiBold();
                     
-                    table.Cell().Background(bgColor).Padding(3)
-                        .Text(transaction.AdditionalFields.GetValueOrDefault("AccountName", "").ToString()).FontSize(9);
-                    
-                    table.Cell().Background(bgColor).Padding(3)
-                        .Text(transaction.Description).FontSize(9);
-                    
-                    table.Cell().Background(bgColor).Padding(3)
-                        .Text(transaction.AdditionalFields.GetValueOrDefault("SupplierInvoiceNo", "").ToString()).FontSize(9);
-                    
-                    table.Cell().Background(bgColor).Padding(3)
-                        .Text(transaction.AdditionalFields.GetValueOrDefault("InvoiceNo", "").ToString()).FontSize(9);
-                    
-                    table.Cell().Background(bgColor).Padding(3)
-                        .Text(transaction.Reference).FontSize(9);
-
-                    // Debit
-                    table.Cell().Background(bgColor).Padding(3)
-                        .Text(transaction.Debit > 0 ? FormatCurrency(transaction.Debit, transaction.Currency) : "")
-                        .FontSize(9);
-
-                    // Credit
-                    table.Cell().Background(bgColor).Padding(3)
-                        .Text(transaction.Credit > 0 ? FormatCurrency(transaction.Credit, transaction.Currency) : "")
-                        .FontSize(9);
-
-                    // Balance
-                    var balanceText = FormatCurrency(Math.Abs(transaction.Balance), transaction.Currency);
-                    if (transaction.Balance < 0)
-                        balanceText = $"({balanceText})";
-                    
-                    table.Cell().Background(bgColor).Padding(3)
-                        .Text(balanceText).FontSize(9);
-                }
-            });
-        }
-
-        private void RenderSummary(IContainer container, StatementSummaryDTO summary, ReportBrandingDTO branding)
-        {
-            container.Column(column =>
-            {
-                column.Item().PaddingTop(10).Text("Summary")
-                    .FontSize(12).SemiBold();
-
-                column.Item().Table(table =>
+                column.Item().PaddingVertical(5).Table(table =>
                 {
                     table.ColumnsDefinition(columns =>
                     {
-                        columns.RelativeColumn(2);
+                        columns.RelativeColumn(1);
                         columns.RelativeColumn(1);
                     });
 
-                    // Summary rows
-                    AddSummaryRow(table, "Opening Balance", FormatCurrency(summary.OpeningBalance, summary.Currency));
-                    AddSummaryRow(table, "Total Debits", FormatCurrency(summary.TotalDebits, summary.Currency));
-                    AddSummaryRow(table, "Total Credits", FormatCurrency(summary.TotalCredits, summary.Currency));
-                    AddSummaryRow(table, "Closing Balance", FormatCurrency(summary.ClosingBalance, summary.Currency));
+                    table.Cell().Element(CellStyle).Text("Opening Balance:");
+                    table.Cell().Element(CellStyle).Text(FormatCurrency(data.Summary.OpeningBalance, data.Header.Currency));
+                    table.Cell().Element(CellStyle).Text("Total Debits:");
+                    table.Cell().Element(CellStyle).Text(FormatCurrency(data.Summary.TotalDebits, data.Header.Currency));
+                    table.Cell().Element(CellStyle).Text("Total Credits:");
+                    table.Cell().Element(CellStyle).Text(FormatCurrency(data.Summary.TotalCredits, data.Header.Currency));
+                    table.Cell().Element(CellStyle).Text("Closing Balance:");
+                    table.Cell().Element(CellStyle).Text(FormatCurrency(data.Summary.ClosingBalance, data.Header.Currency));
                 });
+
+                column.Item().PaddingVertical(20);
+
+                // Transaction History
+                if (data.Transactions?.Any() == true)
+                {
+                    column.Item().Text("TRANSACTION HISTORY")
+                        .FontSize(request.Branding.Typography.BodySize)
+                        .SemiBold();
+
+                    column.Item().PaddingVertical(10).Table(table =>
+                    {
+                        table.ColumnsDefinition(columns =>
+                        {
+                            columns.RelativeColumn(1); // Date
+                            columns.RelativeColumn(2); // Description
+                            columns.RelativeColumn(1); // Reference
+                            columns.RelativeColumn(1); // Debit
+                            columns.RelativeColumn(1); // Credit
+                            columns.RelativeColumn(1); // Balance
+                        });
+
+                        // Header
+                        table.Header(header =>
+                        {
+                            header.Cell().Element(HeaderCellStyle).Text("Date");
+                            header.Cell().Element(HeaderCellStyle).Text("Description");
+                            header.Cell().Element(HeaderCellStyle).Text("Reference");
+                            header.Cell().Element(HeaderCellStyle).Text("Debit");
+                            header.Cell().Element(HeaderCellStyle).Text("Credit");
+                            header.Cell().Element(HeaderCellStyle).Text("Balance");
+                        });
+
+                        // Rows
+                        foreach (var transaction in data.Transactions)
+                        {
+                            table.Cell().Element(CellStyle).Text(FormatDate(transaction.Date, request.Configuration.Culture));
+                            table.Cell().Element(CellStyle).Text(transaction.Description);
+                            table.Cell().Element(CellStyle).Text(transaction.Reference);
+                            table.Cell().Element(CellStyle).Text(transaction.Debit > 0 ? FormatCurrency(transaction.Debit, transaction.Currency) : "");
+                            table.Cell().Element(CellStyle).Text(transaction.Credit > 0 ? FormatCurrency(transaction.Credit, transaction.Currency) : "");
+                            table.Cell().Element(CellStyle).Text(FormatCurrency(transaction.Balance, transaction.Currency));
+                        }
+                    });
+                }
+
+                // Footer
+                column.Item().PaddingTop(30).Element(footerContainer => RenderFooter(footerContainer, request.Branding));
+
+                // Statement Footer
+                column.Item().PaddingTop(20).AlignCenter().Text("*** END OF STATEMENT ***")
+                    .FontSize(request.Branding.Typography.SmallSize)
+                    .Italic();
             });
         }
 
-        private void AddSummaryRow(TableDescriptor table, string label, string value)
+        private static IContainer CellStyle(IContainer container)
         {
-            table.Cell().Padding(5).Text(label).FontSize(10).SemiBold();
-            table.Cell().Padding(5).Text(value).FontSize(10);
+            return container
+                .Border(1)
+                .BorderColor("#CCCCCC")
+                .Padding(8)
+                .AlignMiddle();
         }
 
-        private void RenderContactFooter(IContainer container, ReportBrandingDTO branding)
+        private static IContainer HeaderCellStyle(IContainer container)
         {
-            container.PaddingTop(20).Column(column =>
-            {
-                // Contact information block
-                column.Item().BorderTop(1).BorderColor(Colors.Grey.Lighten2).PaddingTop(10);
-                
-                if (!string.IsNullOrWhiteSpace(branding.Company.Address))
-                {
-                    column.Item().Text(branding.Company.Address)
-                        .FontSize(branding.Typography.SmallSize)
-                        .FontColor(Colors.Grey.Medium);
-                }
-                
-                if (!string.IsNullOrWhiteSpace(branding.Company.Phone))
-                {
-                    column.Item().Text(branding.Company.Phone)
-                        .FontSize(branding.Typography.SmallSize)
-                        .FontColor(Colors.Grey.Medium);
-                }
-                
-                if (!string.IsNullOrWhiteSpace(branding.Company.Email))
-                {
-                    column.Item().Text(branding.Company.Email)
-                        .FontSize(branding.Typography.SmallSize)
-                        .FontColor(Colors.Grey.Medium);
-                }
-            });
-        }
-
-        public override TemplateValidationResult ValidateRequest(TemplateReportRequestDTO request)
-        {
-            var result = base.ValidateRequest(request);
-            
-            if (result.IsValid)
-            {
-                var statementData = ParseTemplateData<AccountStatementDataDTO>(request.Data);
-                if (statementData == null)
-                {
-                    result.Errors.Add("Data must be of type AccountStatementDataDTO");
-                }
-                else
-                {
-                    if (statementData.Header == null)
-                        result.Errors.Add("Statement header is required");
-                    if (statementData.Transactions == null || !statementData.Transactions.Any())
-                        result.Warnings.Add("No transactions found in statement");
-                }
-            }
-
-            result.IsValid = !result.Errors.Any();
-            return result;
+            return container
+                .Border(1)
+                .BorderColor("#CCCCCC")
+                .Background("#F0F0F0")
+                .Padding(8)
+                .AlignMiddle();
         }
 
         public override object GetSampleData()
@@ -257,9 +150,9 @@ namespace ReportHub.Objects.Templates
             {
                 Header = new StatementHeaderDTO
                 {
-                    AccountNumber = "123456789",
-                    AccountName = "Main Account",
-                    FromDate = DateTime.Now.AddMonths(-1),
+                    AccountNumber = "1234567890",
+                    AccountName = "Sample Account",
+                    FromDate = DateTime.Now.AddDays(-30),
                     ToDate = DateTime.Now,
                     Currency = "JOD"
                 },
@@ -267,46 +160,38 @@ namespace ReportHub.Objects.Templates
                 {
                     new TransactionDTO
                     {
-                        Date = DateTime.Now.AddDays(-15),
-                        Reference = "REF001",
-                        Description = "Payment received",
-                        Debit = 0,
+                        Date = DateTime.Now.AddDays(-25),
+                        Reference = "TXN001",
+                        Description = "Opening Balance",
                         Credit = 1000.00m,
                         Balance = 1000.00m,
-                        Currency = "JOD",
-                        AdditionalFields = new Dictionary<string, object>
-                        {
-                            { "AccountNo", "123456" },
-                            { "AccountName", "Sample Account" },
-                            { "SupplierInvoiceNo", "" },
-                            { "InvoiceNo", "INV001" }
-                        }
+                        Currency = "JOD"
                     },
                     new TransactionDTO
                     {
-                        Date = DateTime.Now.AddDays(-10),
-                        Reference = "REF002",
-                        Description = "Service fee",
-                        Debit = 50.00m,
-                        Credit = 0,
-                        Balance = 950.00m,
-                        Currency = "JOD",
-                        AdditionalFields = new Dictionary<string, object>
-                        {
-                            { "AccountNo", "123456" },
-                            { "AccountName", "Sample Account" },
-                            { "SupplierInvoiceNo", "SUPP001" },
-                            { "InvoiceNo", "" }
-                        }
+                        Date = DateTime.Now.AddDays(-20),
+                        Reference = "TXN002",
+                        Description = "Payment Received",
+                        Credit = 500.00m,
+                        Balance = 1500.00m,
+                        Currency = "JOD"
+                    },
+                    new TransactionDTO
+                    {
+                        Date = DateTime.Now.AddDays(-15),
+                        Reference = "TXN003",
+                        Description = "Service Charge",
+                        Debit = 25.00m,
+                        Balance = 1475.00m,
+                        Currency = "JOD"
                     }
                 },
                 Summary = new StatementSummaryDTO
                 {
-                    OpeningBalance = 0m,
-                    TotalDebits = 50.00m,
-                    TotalCredits = 1000.00m,
-                    ClosingBalance = 950.00m,
-                    Currency = "JOD"
+                    OpeningBalance = 1000.00m,
+                    TotalCredits = 500.00m,
+                    TotalDebits = 25.00m,
+                    ClosingBalance = 1475.00m
                 }
             };
         }
@@ -318,12 +203,13 @@ namespace ReportHub.Objects.Templates
                 TemplateId = TemplateId,
                 RequiredFields = new Dictionary<string, FieldSchema>
                 {
-                    { "Header", new FieldSchema { Name = "Header", Type = "StatementHeaderDTO", Description = "Statement header information", IsRequired = true } },
-                    { "Transactions", new FieldSchema { Name = "Transactions", Type = "List<TransactionDTO>", Description = "List of transactions", IsRequired = true } }
+                    ["header"] = new FieldSchema { Name = "header", Type = "object", Description = "Statement header information", IsRequired = true },
+                    ["transactions"] = new FieldSchema { Name = "transactions", Type = "array", Description = "List of transactions", IsRequired = true },
+                    ["summary"] = new FieldSchema { Name = "summary", Type = "object", Description = "Statement summary", IsRequired = true }
                 },
                 OptionalFields = new Dictionary<string, FieldSchema>
                 {
-                    { "Summary", new FieldSchema { Name = "Summary", Type = "StatementSummaryDTO", Description = "Statement summary totals", IsRequired = false } }
+                    ["additionalFields"] = new FieldSchema { Name = "additionalFields", Type = "object", Description = "Additional fields", IsRequired = false }
                 },
                 SupportedCurrencies = new List<string> { "JOD", "USD", "EUR" },
                 SupportedLanguages = new List<string> { "en-US", "ar-JO" }

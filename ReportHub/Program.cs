@@ -46,9 +46,6 @@ builder.Services.AddLogging(config =>
     config.SetMinimumLevel(LogLevel.Information);
 });
 
-// Add ReportHub services
-builder.Services.AddReportServices();
-
 // Add new template engine services
 builder.Services.AddTemplateEngine();
 builder.Services.AddReportTemplates();

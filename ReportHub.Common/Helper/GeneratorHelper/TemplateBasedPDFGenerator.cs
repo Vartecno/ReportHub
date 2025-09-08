@@ -260,7 +260,7 @@ namespace ReportHub.Common.Helper.GeneratorHelper
 
         private Dictionary<string, object> CreateMetadataFromSettings(ReportSettings settings)
         {
-            return new Dictionary<string, object>(settings.Metadata);
+            return settings.Metadata.ToDictionary(kvp => kvp.Key, kvp => (object)kvp.Value);
         }
     }
 }

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using QuestPDF.Fluent;
+using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using ReportHub.Objects.DTOs;
 using ReportHub.Objects.HelperModel;

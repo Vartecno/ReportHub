@@ -114,7 +114,7 @@ namespace ReportHub.Common.Services
                             .FontFamily(request.Branding.Typography.FontFamily));
 
                         // Generate content using template
-                        page.Content().Element(template.GenerateContent(request));
+                        page.Content().Element(container => template.GenerateContent(container, request));
 
                         // Add footer if enabled
                         if (request.Configuration.IncludeFooter)

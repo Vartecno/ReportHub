@@ -21,7 +21,7 @@ namespace ReportHub.Objects.Templates
         public virtual string Version => "1.0.0";
         public abstract Type[] SupportedDataTypes { get; }
 
-        public abstract IContainer GenerateContent(TemplateReportRequestDTO request);
+        public abstract void GenerateContent(IContainer container, TemplateReportRequestDTO request);
         public abstract object GetSampleData();
         public abstract TemplateConfigSchema GetConfigSchema();
 
@@ -162,6 +162,10 @@ namespace ReportHub.Objects.Templates
         {
             container.AlignCenter().Text(text =>
             {
+                text.DefaultTextStyle(TextStyle.Default
+                    .FontSize(branding.Typography.SmallSize)
+                    .FontColor(branding.Colors.Text));
+
                 if (!string.IsNullOrWhiteSpace(branding.Company.Address))
                 {
                     text.Span(branding.Company.Address);
@@ -181,9 +185,7 @@ namespace ReportHub.Objects.Templates
                         text.Span(" | ");
                     text.Span($"Email: {branding.Company.Email}");
                 }
-            })
-            .FontSize(branding.Typography.SmallSize)
-            .FontColor(branding.Colors.Text);
+            });
         }
 
         /// <summary>

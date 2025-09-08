@@ -51,7 +51,7 @@ public class APIReponseSingle<T>
 
 
 
-public class CompanyInfoDTO
+public class InvoiceCompanyInfoDTO
 {
     public int Id { get; set; }
     public int CompanyNumber { get; set; }

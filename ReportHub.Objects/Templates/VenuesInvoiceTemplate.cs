@@ -18,15 +18,13 @@ namespace ReportHub.Objects.Templates
         public override string Description => "Professional invoice template for logistics and shipping services";
         public override Type[] SupportedDataTypes => new[] { typeof(VenuesInvoiceDataDTO) };
 
-        public override IContainer GenerateContent(TemplateReportRequestDTO request)
+        public override void GenerateContent(IContainer container, TemplateReportRequestDTO request)
         {
             var invoiceData = ParseTemplateData<VenuesInvoiceDataDTO>(request.Data);
             if (invoiceData == null)
                 throw new ArgumentException("Invalid data format for VenuesInvoiceTemplate");
 
-            return container =>
-            {
-                container.Column(column =>
+            container.Column(column =>
                 {
                     // Company Header with Logo
                     column.Item().PaddingBottom(20).Element(headerContainer => 
@@ -73,7 +71,7 @@ namespace ReportHub.Objects.Templates
                             RenderPaymentDetails(paymentContainer, invoiceData.BankAccounts, request.Branding));
                     }
                 });
-            };
+        }
         }
 
         private void RenderInvoiceHeader(IContainer container, ReportBrandingDTO branding, InvoiceHeaderDTO header)

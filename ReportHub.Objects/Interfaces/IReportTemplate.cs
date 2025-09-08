@@ -37,9 +37,9 @@ namespace ReportHub.Objects.Interfaces
         /// <summary>
         /// Generate the report content using QuestPDF
         /// </summary>
+        /// <param name="container">Container to render content into</param>
         /// <param name="request">Template report request with data and branding</param>
-        /// <returns>QuestPDF document container</returns>
-        IContainer GenerateContent(TemplateReportRequestDTO request);
+        void GenerateContent(IContainer container, TemplateReportRequestDTO request);
 
         /// <summary>
         /// Validate the request data for this template

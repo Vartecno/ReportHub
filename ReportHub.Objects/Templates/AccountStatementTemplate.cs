@@ -18,15 +18,13 @@ namespace ReportHub.Objects.Templates
         public override string Description => "Professional account statement template for financial transactions";
         public override Type[] SupportedDataTypes => new[] { typeof(AccountStatementDataDTO) };
 
-        public override IContainer GenerateContent(TemplateReportRequestDTO request)
+        public override void GenerateContent(IContainer container, TemplateReportRequestDTO request)
         {
             var statementData = ParseTemplateData<AccountStatementDataDTO>(request.Data);
             if (statementData == null)
                 throw new ArgumentException("Invalid data format for AccountStatementTemplate");
 
-            return container =>
-            {
-                container.Column(column =>
+            container.Column(column =>
                 {
                     // Header Section
                     column.Item().PaddingBottom(20).Element(headerContainer => 
@@ -58,7 +56,7 @@ namespace ReportHub.Objects.Templates
                     column.Item().Element(footerContainer => 
                         RenderContactFooter(footerContainer, request.Branding));
                 });
-            };
+        }
         }
 
         private void RenderStatementHeader(IContainer container, ReportBrandingDTO branding, StatementHeaderDTO header)

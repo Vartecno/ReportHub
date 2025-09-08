@@ -6,6 +6,8 @@ using ReportHub.Objects.HelperModel;
 
 namespace ReportHub.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class ReportsController : ControllerBase
     {
         private readonly IReportGeneratorService _reportGenerator;

@@ -40,193 +40,184 @@ namespace ReportHub.Common.Helper.GeneratorHelper
                 {
                     page.Size(PageSizes.A4);
                     page.Margin(2, Unit.Centimetre);
-                    page.DefaultTextStyle(x => x.FontSize(settings.Formatting.FontSize)
-                        .FontFamily(Fonts.Arial) // Ensure consistent font
-                        .LineHeight(1.2f)); // Better line spacing
+                    page.DefaultTextStyle(x => x.FontSize(11).FontFamily(Fonts.Arial));
 
-                    // Header
-                    if (settings.Formatting.IncludeHeader)
-                    {
-                        page.Header().Element(ComposeHeader);
-                    }
-
-                    // Content
-                    page.Content().Element(ComposeContent);
-
-                    // Footer
-                    if (settings.Formatting.IncludeFooter)
-                    {
-                        page.Footer().Element(ComposeFooter);
-                    }
+                    page.Content().Element(ComposeInvoice);
                 });
 
-                void ComposeHeader(IContainer container)
-                {
-                    container.Row(row =>
-                    {
-                        row.RelativeItem().Column(column =>
-                        {
-                            column.Item().Text(settings.Title)
-                                .FontSize(20).SemiBold().FontColor(settings.Formatting.PrimaryColor);
-
-                            if (!string.IsNullOrEmpty(settings.Subtitle))
-                            {
-                                column.Item().Text(settings.Subtitle)
-                                    .FontSize(14).FontColor(Colors.Grey.Darken2);
-                            }
-                        });
-
-                        row.ConstantItem(100).Column(column =>
-                        {
-                            column.Item().AlignRight().Text($"Generated: {settings.CreatedDate:dd/MM/yyyy}")
-                                .FontSize(10);
-                            column.Item().AlignRight().Text($"Author: {settings.Author}")
-                                .FontSize(10);
-                        });
-                    });
-                }
-
-                void ComposeContent(IContainer container)
+                void ComposeInvoice(IContainer container)
                 {
                     container.Column(column =>
                     {
-                        // Add sections
-                        var orderedSections = data.Sections.OrderBy(s => s.Order);
-                        foreach (var section in orderedSections)
+                        // Company Address Header
+                        column.Item().PaddingBottom(10).Text("Amman-Jordan, Mecca Street, Rashed Al-Neimat Building No.9, 3rd Floor, Office No.301")
+                            .FontSize(10);
+
+                        // Company Name
+                        column.Item().PaddingBottom(15).Text("Nuba logistics")
+                            .FontSize(14).SemiBold();
+
+                        // Invoice Title (centered)
+                        column.Item().PaddingBottom(15).AlignCenter().Text("Invoice")
+                            .FontSize(18).SemiBold();
+
+                        // Date and Invoice Details
+                        column.Item().PaddingBottom(15).Column(detailsColumn =>
                         {
-                            column.Item().PaddingVertical(8).Column(sectionColumn =>
+                            detailsColumn.Item().Text($"Date: {settings.CreatedDate:d-M-yyyy}")
+                                .FontSize(11);
+                            detailsColumn.Item().Text($"Invoice Number: {(data.Variables.ContainsKey("invoiceNumber") ? data.Variables["invoiceNumber"] : "")}")
+                                .FontSize(11);
+                            detailsColumn.Item().Text($"Nuba Reference: {(data.Variables.ContainsKey("nubaReference") ? data.Variables["nubaReference"] : "")}")
+                                .FontSize(11);
+                        });
+
+                        // Shipment Details
+                        var shipmentTable = data.Tables.FirstOrDefault(t => t.Title == "Shipment Details");
+                        if (shipmentTable != null)
+                        {
+                            column.Item().PaddingBottom(15).Column(shipmentColumn =>
                             {
-                                if (!string.IsNullOrEmpty(section.Title))
+                                shipmentColumn.Item().PaddingBottom(5).Text("Shipment Details")
+                                    .FontSize(12).SemiBold();
+
+                                // Create a compact table layout matching the reference
+                                shipmentColumn.Item().Table(table =>
                                 {
-                                    sectionColumn.Item().PaddingBottom(8).Text(section.Title)
-                                        .FontSize(16).SemiBold().FontColor(settings.Formatting.PrimaryColor);
-                                }
-                                sectionColumn.Item().Text(section.Content)
-                                    .FontSize(11).LineHeight(1.4f);
-                            });
-                        }
-
-                        // Add tables
-                        var orderedTables = data.Tables.OrderBy(t => t.Order);
-                        foreach (var table in orderedTables)
-                        {
-                            column.Item().PaddingVertical(15).Element(container => ComposeTable(container, table));
-                        }
-                    });
-                }
-
-                void ComposeTable(IContainer container, ReportTable table)
-                {
-                    container.Column(column =>
-                    {
-                        if (!string.IsNullOrEmpty(table.Title))
-                        {
-                            column.Item().PaddingBottom(8).Text(table.Title)
-                                .FontSize(14).SemiBold().FontColor(settings.Formatting.PrimaryColor);
-                        }
-
-                        column.Item().Table(tableBuilder =>
-                        {
-                            // Define columns with better width distribution
-                            tableBuilder.ColumnsDefinition(columns =>
-                            {
-                                for (int j = 0; j < table.Headers.Count; j++)
-                                {
-                                    // Adjust column widths based on table type and content
-                                    if (table.Headers.Count == 2)
+                                    table.ColumnsDefinition(columns =>
                                     {
-                                        if (j == 0)
-                                            columns.ConstantColumn(150); // Fixed width for labels/field names
-                                        else
-                                            columns.RelativeColumn(); // Flexible width for values
-                                    }
-                                    else if (table.Headers.Count >= 5) // Complex tables like charges
-                                    {
-                                        // More specific width allocation for complex tables
-                                        if (j == 0) columns.ConstantColumn(30);  // No
-                                        else if (j == 1) columns.RelativeColumn(3); // Description
-                                        else if (j == 2) columns.RelativeColumn(2); // Rate
-                                        else if (j == 3) columns.RelativeColumn(2); // Price  
-                                        else if (j == 4) columns.RelativeColumn(1); // Quantity
-                                        else columns.RelativeColumn(2); // Value
-                                    }
-                                    else
-                                    {
-                                        columns.RelativeColumn(); // Default for other tables
-                                    }
-                                }
-                            });
+                                        columns.RelativeColumn(1);
+                                        columns.RelativeColumn(3);
+                                    });
 
-                            // Headers
-                            if (table.ShowHeaders)
-                            {
-                                tableBuilder.Header(header =>
-                                {
-                                    foreach (var headerText in table.Headers)
+                                    foreach (var row in shipmentTable.Rows)
                                     {
-                                        header.Cell().Element(HeaderCellStyle).Text(headerText).SemiBold();
+                                        if (row.Count >= 2)
+                                        {
+                                            table.Cell().Text(row[0]).FontSize(10).SemiBold();
+                                            table.Cell().Text(row[1]).FontSize(10);
+                                        }
                                     }
                                 });
-                            }
+                            });
+                        }
 
-                            // Rows
-                            for (int rowIndex = 0; rowIndex < table.Rows.Count; rowIndex++)
-                            {
-                                var row = table.Rows[rowIndex];
-                                var isAlternate = table.AlternateRowColors && rowIndex % 2 == 1;
-
-                                for (int cellIndex = 0; cellIndex < row.Count && cellIndex < table.Headers.Count; cellIndex++)
-                                {
-                                    var cellText = row[cellIndex]?.ToString() ?? "";
-                                    tableBuilder.Cell()
-                                        .Element(cell => isAlternate ? cell.Background(settings.Formatting.SecondaryColor) : cell)
-                                        .Element(CellStyle)
-                                        .Text(cellText)
-                                        .FontSize(10)
-                                        .LineHeight(1.2f);
-                                }
-                            }
-
-                            static IContainer HeaderCellStyle(IContainer container)
-                            {
-                                return container
-                                    .Border(1)
-                                    .BorderColor(Colors.Grey.Medium)
-                                    .Background(Colors.Grey.Lighten3)
-                                    .PaddingVertical(8)
-                                    .PaddingHorizontal(10)
-                                    .AlignCenter()
-                                    .AlignMiddle();
-                            }
-
-                            static IContainer CellStyle(IContainer container)
-                            {
-                                return container
-                                    .Border(1)
-                                    .BorderColor(Colors.Grey.Lighten2)
-                                    .PaddingVertical(6)
-                                    .PaddingHorizontal(8)
-                                    .AlignLeft()
-                                    .AlignMiddle();
-                            }
-                        });
-                    });
-                }
-
-                void ComposeFooter(IContainer container)
-                {
-                    container.Row(row =>
-                    {
-                        row.RelativeItem().Text("");
-
-                        if (settings.Formatting.IncludePageNumbers)
+                        // Charges
+                        var chargesTable = data.Tables.FirstOrDefault(t => t.Title == "Charges");
+                        if (chargesTable != null)
                         {
-                            row.ConstantItem(50).AlignRight().Text(x =>
+                            column.Item().PaddingBottom(15).Column(chargesColumn =>
                             {
-                                x.Span("Page ");
-                                x.CurrentPageNumber();
-                                x.Span(" of ");
-                                x.TotalPages();
+                                chargesColumn.Item().PaddingBottom(5).Text("Charges")
+                                    .FontSize(12).SemiBold();
+
+                                chargesColumn.Item().Table(table =>
+                                {
+                                    table.ColumnsDefinition(columns =>
+                                    {
+                                        columns.ConstantColumn(30);
+                                        columns.RelativeColumn();
+                                        columns.ConstantColumn(100);
+                                        columns.ConstantColumn(100);
+                                        columns.ConstantColumn(80);
+                                        columns.ConstantColumn(100);
+                                    });
+
+                                    // Header
+                                    table.Cell().Text("No").FontSize(10).SemiBold();
+                                    table.Cell().Text("Description").FontSize(10).SemiBold();
+                                    table.Cell().Text("Rate Per Unit").FontSize(10).SemiBold();
+                                    table.Cell().Text("Price").FontSize(10).SemiBold();
+                                    table.Cell().Text("Quantity").FontSize(10).SemiBold();
+                                    table.Cell().Text("Value").FontSize(10).SemiBold();
+
+                                    // Rows
+                                    foreach (var row in chargesTable.Rows)
+                                    {
+                                        for (int i = 0; i < 6 && i < row.Count; i++)
+                                        {
+                                            table.Cell().Text(row[i]).FontSize(10);
+                                        }
+                                    }
+                                });
+                            });
+                        }
+
+                        // Total Amount
+                        var totalTable = data.Tables.FirstOrDefault(t => t.Title == "Total Amount");
+                        if (totalTable != null && totalTable.Rows.Count > 0)
+                        {
+                            column.Item().PaddingBottom(15).AlignRight()
+                                .Text($"Total Invoice Amount: {totalTable.Rows[0][1]}")
+                                .FontSize(12).SemiBold();
+                        }
+
+                        // Scan Code Note
+                        column.Item().PaddingBottom(10).Text("Scan Code is only available on Sanad-Jo")
+                            .FontSize(9);
+
+                        // Payment Details
+                        var paymentTable = data.Tables.FirstOrDefault(t => t.Title == "Payment Details");
+                        if (paymentTable != null)
+                        {
+                            column.Item().Column(paymentColumn =>
+                            {
+                                paymentColumn.Item().PaddingBottom(5).Text("Payment Details")
+                                    .FontSize(12).SemiBold();
+
+                                paymentColumn.Item().Text("Beneficiary Name: Nuba Logistics")
+                                    .FontSize(10).SemiBold();
+
+                                // Group accounts by currency
+                                var jodAccount = paymentTable.Rows.FirstOrDefault(r => r[0] == "JOD Account");
+                                var jodAccountNo = paymentTable.Rows.FirstOrDefault(r => r[0] == "JOD Account No");
+                                if (jodAccount != null && jodAccountNo != null)
+                                {
+                                    paymentColumn.Item().Text($"Account Currency: JOD Account")
+                                        .FontSize(10);
+                                    paymentColumn.Item().Text($"IBAN: {jodAccount[1]}")
+                                        .FontSize(10);
+                                    paymentColumn.Item().Text($"Account No: {jodAccountNo[1]}")
+                                        .FontSize(10);
+                                    paymentColumn.Item().Text("SWIFT: ARABJOAX100")
+                                        .FontSize(10);
+                                }
+
+                                var usdAccount = paymentTable.Rows.FirstOrDefault(r => r[0] == "USD Account");
+                                var usdAccountNo = paymentTable.Rows.FirstOrDefault(r => r[0] == "USD Account No");
+                                if (usdAccount != null && usdAccountNo != null)
+                                {
+                                    paymentColumn.Item().Text($"Account Currency: USD Account")
+                                        .FontSize(10);
+                                    paymentColumn.Item().Text($"IBAN: {usdAccount[1]}")
+                                        .FontSize(10);
+                                    paymentColumn.Item().Text($"Account No: {usdAccountNo[1]}")
+                                        .FontSize(10);
+                                    paymentColumn.Item().Text("SWIFT: ARABJOAX100")
+                                        .FontSize(10);
+                                }
+
+                                var eurAccount = paymentTable.Rows.FirstOrDefault(r => r[0] == "EUR Account");
+                                var eurAccountNo = paymentTable.Rows.FirstOrDefault(r => r[0] == "EUR Account No");
+                                if (eurAccount != null && eurAccountNo != null)
+                                {
+                                    paymentColumn.Item().Text($"Account Currency: EUR Account")
+                                        .FontSize(10);
+                                    paymentColumn.Item().Text($"IBAN: {eurAccount[1]}")
+                                        .FontSize(10);
+                                    paymentColumn.Item().Text($"Account No: {eurAccountNo[1]}")
+                                        .FontSize(10);
+                                    paymentColumn.Item().Text("SWIFT: ARABJOAX100")
+                                        .FontSize(10);
+                                }
+
+                                // ClicQ Service
+                                var clicqService = paymentTable.Rows.FirstOrDefault(r => r[0] == "ClicQ Service");
+                                if (clicqService != null)
+                                {
+                                    paymentColumn.Item().Text($"ClicQ Service: {clicqService[1]}")
+                                        .FontSize(10);
+                                }
                             });
                         }
                     });

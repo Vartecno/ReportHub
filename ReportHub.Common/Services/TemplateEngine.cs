@@ -20,6 +20,8 @@ namespace ReportHub.Common.Services
 
         public TemplateEngine(ILogger<TemplateEngine>? logger = null)
         {
+            // Configure QuestPDF license for Community use
+            QuestPDF.Settings.License = LicenseType.Community;
             _logger = logger;
         }
 

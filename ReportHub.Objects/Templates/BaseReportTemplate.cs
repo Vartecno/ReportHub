@@ -15,6 +15,12 @@ namespace ReportHub.Objects.Templates
     /// </summary>
     public abstract class BaseReportTemplate : IReportTemplate
     {
+        static BaseReportTemplate()
+        {
+            // Configure QuestPDF license for Community use
+            QuestPDF.Settings.License = LicenseType.Community;
+        }
+
         public abstract string TemplateId { get; }
         public abstract string DisplayName { get; }
         public abstract string Description { get; }

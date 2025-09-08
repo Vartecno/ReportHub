@@ -1,0 +1,161 @@
+{
+  "venues_invoice_test": {
+    "reportType": "venues_invoice",
+    "branding": {
+      "company": {
+        "name": "Nuba Logistics",
+        "address": "Amman-Jordan, Mecca Street, Rashed Al-Neimat Building No.9, 3rd Floor, Office No.301",
+        "phone": "+96265812954",
+        "email": "info@nubalogistic.com",
+        "city": "Amman"
+      },
+      "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+      "colors": {
+        "primary": "#0066CC",
+        "secondary": "#F0F0F0",
+        "text": "#333333"
+      },
+      "typography": {
+        "fontFamily": "Arial",
+        "headerSize": 18,
+        "bodySize": 11,
+        "smallSize": 9
+      }
+    },
+    "data": {
+      "header": {
+        "invoiceNumber": "202500306",
+        "date": "2025-01-15T00:00:00Z",
+        "reference": "NUBA-REF-12345",
+        "customerName": "VENUES FOR CHEMICALS"
+      },
+      "shipment": {
+        "service": "FCL Sea Freight",
+        "origin": "Shanghai",
+        "destination": "Aqaba",
+        "awb": "VENUES202500306",
+        "mbl": "MBL789012345",
+        "hbl": "HBL345678901",
+        "weight": 15000,
+        "volume": "28 CBM"
+      },
+      "charges": [
+        {
+          "sequence": 1,
+          "description": "Ocean Freight",
+          "ratePerUnit": 850.000,
+          "quantity": 1,
+          "price": 850.000,
+          "value": 850.000,
+          "currency": "JOD"
+        },
+        {
+          "sequence": 2,
+          "description": "Documentation Fee",
+          "ratePerUnit": 50.000,
+          "quantity": 1,
+          "price": 50.000,
+          "value": 50.000,
+          "currency": "JOD"
+        }
+      ],
+      "total": {
+        "subtotal": 900.000,
+        "tax": 0,
+        "total": 900.000,
+        "currency": "JOD"
+      },
+      "bankAccounts": [
+        {
+          "bankName": "Arab Bank",
+          "accountName": "Nuba Logistics",
+          "accountNumber": "0123456789",
+          "iban": "JO94ARAB0123456789012345",
+          "swift": "ARABJOAX100",
+          "currency": "JOD"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Invoice",
+      "includePageNumbers": true,
+      "includeFooter": true
+    }
+  },
+  "account_statement_test": {
+    "reportType": "account_statement",
+    "branding": {
+      "company": {
+        "name": "Nuba logistics",
+        "address": "Jordan, Mecca Street, Rashed Al-Neimat Building No.9, 3rd Floor, Office",
+        "phone": "+96265812954",
+        "email": "info@nubalogistic.com",
+        "city": "Amman"
+      },
+      "colors": {
+        "primary": "#0066CC",
+        "secondary": "#F0F0F0",
+        "text": "#333333"
+      },
+      "typography": {
+        "fontFamily": "Arial",
+        "headerSize": 16,
+        "bodySize": 10,
+        "smallSize": 8
+      }
+    },
+    "data": {
+      "header": {
+        "accountNumber": "123456789",
+        "accountName": "Main Account",
+        "fromDate": "2025-01-01T00:00:00Z",
+        "toDate": "2025-01-31T23:59:59Z",
+        "currency": "JOD"
+      },
+      "transactions": [
+        {
+          "date": "2025-01-05T00:00:00Z",
+          "reference": "PAY001",
+          "description": "Customer Payment",
+          "debit": 0,
+          "credit": 1500.000,
+          "balance": 1500.000,
+          "currency": "JOD",
+          "additionalFields": {
+            "accountNo": "123456",
+            "accountName": "CUSTOMER RECEIVABLES",
+            "supplierInvoiceNo": "",
+            "invoiceNo": "INV-2025-001"
+          }
+        },
+        {
+          "date": "2025-01-10T00:00:00Z",
+          "reference": "EXP001",
+          "description": "Office Rent",
+          "debit": 800.000,
+          "credit": 0,
+          "balance": 700.000,
+          "currency": "JOD",
+          "additionalFields": {
+            "accountNo": "654321",
+            "accountName": "OFFICE EXPENSES",
+            "supplierInvoiceNo": "RENT-JAN-2025",
+            "invoiceNo": ""
+          }
+        }
+      ],
+      "summary": {
+        "openingBalance": 0,
+        "totalDebits": 800.000,
+        "totalCredits": 1500.000,
+        "closingBalance": 700.000,
+        "currency": "JOD"
+      }
+    },
+    "configuration": {
+      "title": "Account Statements",
+      "includePageNumbers": true,
+      "includeFooter": true
+    }
+  }
+}

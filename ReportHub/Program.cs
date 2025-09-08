@@ -1,155 +1,95 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Versioning;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using OfficeOpenXml;
-using ReportHub.Common.Authentication; 
 using ReportHub.Common.Base;
-using ReportHub.Common.Helper.DataHelpers;
-using ReportHub.Common.Helper.DataHelpers.IDataHelpers;
+using ReportHub.Common.Configuration;
 using ReportHub.Common.Helper.GeneratorHelper;
-using ReportHub.Middlewares;
-using Swashbuckle.AspNetCore.Filters;
-using System.Data;
-using System.Data.SqlClient;
-using System.Text;
+using ReportHub.Common.Services;
+using ReportHub.Objects.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
-var configuration = builder.Configuration;
 
-builder.Services.AddApiVersioning(options =>
-{
-    options.ReportApiVersions = true;
-    options.AssumeDefaultVersionWhenUnspecified = true;
-    options.DefaultApiVersion = new ApiVersion(1, 0);
-    options.ApiVersionReader = new UrlSegmentApiVersionReader();
-});
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-
-//builder.Configuration.AddJsonFile("LogisticsSalesSettings.json", optional: false, reloadOnChange: true);
-
-ReportHub.Common.Base.ServiceCollectionExtensions.RepositroyScoped(builder.Services);
-ReportHub.Common.Base.CustomServiceCollectionExtensions.RepositroyScoped(builder.Services);
-ReportHub.Common.Base.ReportServiceCollectionExtensions.AddReportGeneration(builder.Services);
- 
-
-
-builder.Services.AddHttpContextAccessor();
-
- 
-
-
-builder.Services.AddSwaggerGen(setup =>
+builder.Services.AddSwaggerGen(c =>
 {
-    setup.EnableAnnotations();
-    // Include 'SecurityScheme' to use JWT Authentication
-    var jwtSecurityScheme = new OpenApiSecurityScheme
-    {
-        BearerFormat = "JWT",
-        Name = "JWT Authentication",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = JwtBearerDefaults.AuthenticationScheme,
-        Description = "Put ONLY your JWT Bearer token on textbox below!",
-
-        Reference = new OpenApiReference
-        {
-            Id = JwtBearerDefaults.AuthenticationScheme,
-            Type = ReferenceType.SecurityScheme
-        }
-    };
-    setup.SwaggerDoc("v1", new OpenApiInfo { Title = "API v1", Version = "v1" });
-    setup.SwaggerDoc("v2", new OpenApiInfo { Title = "API v2", Version = "v2" });
-
-    setup.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
-    setup.OperationFilter<SecurityRequirementsOperationFilter>();
-
-    setup.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        { jwtSecurityScheme, Array.Empty<string>() }
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo 
+    { 
+        Title = "ReportHub API", 
+        Version = "v1",
+        Description = "Centralized reporting system supporting 50+ report types with dynamic branding"
     });
-
+    
+    // Include XML comments for API documentation
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        c.IncludeXmlComments(xmlPath);
+    }
 });
 
-
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
-
+// Configure CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: MyAllowSpecificOrigins,
-        builder =>
-        {
-            builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-        });
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
 });
 
-builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("AppSettings"));
-builder.Services.AddOptions();
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = false,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
-                .GetBytes(builder.Configuration.GetSection("AppSettings:SecretKey").Value ?? "")),
-            ValidateIssuer = false,
-            ValidateAudience = false
-        };
-    });
+// Add logging
+builder.Services.AddLogging(config =>
+{
+    config.AddConsole();
+    config.AddDebug();
+    config.SetMinimumLevel(LogLevel.Information);
+});
 
-builder.Services.AddControllersWithViews()
-    .AddNewtonsoftJson(options =>
-    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-);
+// Add ReportHub services
+builder.Services.AddReportServices();
 
+// Add new template engine services
+builder.Services.AddTemplateEngine();
+builder.Services.AddReportTemplates();
+
+// Legacy PDF generator services (for backward compatibility)
+builder.Services.AddScoped<PDF_GeneratorHelper>();
+builder.Services.AddScoped<Word_GeneratorHelper>();
+builder.Services.AddScoped<Excel_GeneratorHelper>();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-app.UseSwagger();
-app.UseSwaggerUI(c =>
+if (app.Environment.IsDevelopment())
 {
-
-    if (app.Environment.IsDevelopment())
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Base");
-        c.SwaggerEndpoint("/swagger/v2/swagger.json", "Main");
-    }
-    else
-    {
-        // To deploy on IIS
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Base");
-        c.SwaggerEndpoint("/swagger/v2/swagger.json", "Main");
-    }
-
-    // display the Request Duration
-    c.DisplayRequestDuration();
-
-    // Inject custom JavaScript and CSS
-    c.InjectStylesheet("/swagger-ui/swagger-custom.css");
-    c.InjectJavascript("/swagger-ui/swagger-custom.js");
-});
-
-AutoMapperWebConfiguration.Activate();
-app.UseStaticFiles();
-app.UseRouting();
-
-app.UseMiddleware<TokenMiddleware>();
-app.UseMiddleware<ApiWrapper>();
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "ReportHub API V1");
+        c.RoutePrefix = string.Empty; // Serve Swagger UI at the root
+    });
+}
 
 app.UseHttpsRedirection();
-
-app.UseCors(MyAllowSpecificOrigins);
-
-app.UseAuthentication();
-
+app.UseCors("AllowAll");
 app.UseAuthorization();
-
 app.MapControllers();
+
+// Initialize template engine with registered templates
+app.Services.ConfigureTemplateEngine();
+
+// Log startup information
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+logger.LogInformation("ReportHub started successfully");
+
+// Log available templates
+var templateEngine = app.Services.GetRequiredService<ITemplateEngineService>();
+var availableTemplates = templateEngine.GetAvailableTemplates();
+logger.LogInformation("Available templates: {Count}", availableTemplates.Count);
+foreach (var template in availableTemplates)
+{
+    logger.LogInformation("- {TemplateId}: {DisplayName}", template.TemplateId, template.DisplayName);
+}
 
 app.Run();

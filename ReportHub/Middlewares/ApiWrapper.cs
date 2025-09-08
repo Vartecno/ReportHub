@@ -62,7 +62,6 @@ namespace ReportHub.Middlewares
         public async Task Invoke(HttpContext context)//   ,IWorkContext workContext)
         {
 
-
             //var UserName = context.User.Claims.Where(x => x.Type == "Username").Select(x => x.Value).FirstOrDefault();
             //var SessionId = context.User.Claims.Where(x => x.Type == "SessionId").Select(x => x.Value).FirstOrDefault();
 
@@ -93,20 +92,69 @@ namespace ReportHub.Middlewares
                 memoryStream.Position = 0;
                 memoryStream.Seek(0, SeekOrigin.Begin); //seek begin
 
-
-                //string responseString = new StreamReader(memoryStream).ReadToEnd();Encoding.UTF8
-                string jsonString = Encoding.UTF8.GetString(memoryStream.ToArray());
-                string wrappedResponse = this.Wrap(jsonString, context);
-                byte[] responseBytes = Encoding.UTF8.GetBytes(wrappedResponse);
-                //logobj.Response = wrappedResponse;
-                //logobj.StatusCode = context.Response.StatusCode;
-                context.Response.Headers["Content-type"] = "application/vnd.api+json";
-                context.Response.Headers.Remove("Content-Length");
-                context.Response.Body = responseBody;
-                // await ExecuteCreateLog(logobj);
-                //await _IApiLogService.CreateLog(logobj);
-                await context.Response.Body.WriteAsync(responseBytes, 0, responseBytes.Length);
+                // Check if this is a file download response that should not be wrapped
+                if (ShouldSkipWrapping(context))
+                {
+                    // For file downloads, copy the stream directly without wrapping
+                    context.Response.Body = responseBody;
+                    await memoryStream.CopyToAsync(responseBody);
+                }
+                else
+                {
+                    //string responseString = new StreamReader(memoryStream).ReadToEnd();Encoding.UTF8
+                    string jsonString = Encoding.UTF8.GetString(memoryStream.ToArray());
+                    string wrappedResponse = this.Wrap(jsonString, context);
+                    byte[] responseBytes = Encoding.UTF8.GetBytes(wrappedResponse);
+                    //logobj.Response = wrappedResponse;
+                    //logobj.StatusCode = context.Response.StatusCode;
+                    context.Response.Headers["Content-type"] = "application/vnd.api+json";
+                    context.Response.Headers.Remove("Content-Length");
+                    context.Response.Body = responseBody;
+                    // await ExecuteCreateLog(logobj);
+                    //await _IApiLogService.CreateLog(logobj);
+                    await context.Response.Body.WriteAsync(responseBytes, 0, responseBytes.Length);
+                }
             }
+        }
+
+        /// <summary>
+        /// Determines whether the response should skip JSON wrapping (e.g., for file downloads)
+        /// </summary>
+        /// <param name="context">HttpContext</param>
+        /// <returns>True if wrapping should be skipped</returns>
+        private bool ShouldSkipWrapping(HttpContext context)
+        {
+            // Check if it's a file download by examining the path
+            var path = context.Request.Path.Value?.ToLowerInvariant();
+            if (path != null && (path.Contains("/generate") || path.EndsWith(".pdf") || path.EndsWith(".docx") || path.EndsWith(".xlsx")))
+            {
+                return true;
+            }
+
+            // Check Content-Type header for file types
+            if (context.Response.Headers.ContainsKey("Content-Type"))
+            {
+                var contentType = context.Response.Headers["Content-Type"].ToString().ToLowerInvariant();
+                if (contentType.Contains("application/pdf") ||
+                    contentType.Contains("application/vnd.openxmlformats-officedocument") ||
+                    contentType.Contains("application/msword") ||
+                    contentType.Contains("application/vnd.ms-excel"))
+                {
+                    return true;
+                }
+            }
+
+            // Check Content-Disposition header for attachment
+            if (context.Response.Headers.ContainsKey("Content-Disposition"))
+            {
+                var contentDisposition = context.Response.Headers["Content-Disposition"].ToString().ToLowerInvariant();
+                if (contentDisposition.Contains("attachment"))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         //private async Task<bool> ExecuteCreateLog(ApiLogVM log)

@@ -40,7 +40,9 @@ namespace ReportHub.Common.Helper.GeneratorHelper
                 {
                     page.Size(PageSizes.A4);
                     page.Margin(2, Unit.Centimetre);
-                    page.DefaultTextStyle(x => x.FontSize(settings.Formatting.FontSize));
+                    page.DefaultTextStyle(x => x.FontSize(settings.Formatting.FontSize)
+                        .FontFamily(Fonts.Arial) // Ensure consistent font
+                        .LineHeight(1.2f)); // Better line spacing
 
                     // Header
                     if (settings.Formatting.IncludeHeader)
@@ -92,15 +94,15 @@ namespace ReportHub.Common.Helper.GeneratorHelper
                         var orderedSections = data.Sections.OrderBy(s => s.Order);
                         foreach (var section in orderedSections)
                         {
-                            column.Item().PaddingVertical(5).Column(sectionColumn =>
+                            column.Item().PaddingVertical(8).Column(sectionColumn =>
                             {
                                 if (!string.IsNullOrEmpty(section.Title))
                                 {
-                                    sectionColumn.Item().PaddingBottom(5).Text(section.Title)
-                                    .FontSize(16).SemiBold();
-                               
+                                    sectionColumn.Item().PaddingBottom(8).Text(section.Title)
+                                        .FontSize(16).SemiBold().FontColor(settings.Formatting.PrimaryColor);
                                 }
-                                sectionColumn.Item().Text(section.Content);
+                                sectionColumn.Item().Text(section.Content)
+                                    .FontSize(11).LineHeight(1.4f);
                             });
                         }
 
@@ -108,7 +110,7 @@ namespace ReportHub.Common.Helper.GeneratorHelper
                         var orderedTables = data.Tables.OrderBy(t => t.Order);
                         foreach (var table in orderedTables)
                         {
-                            column.Item().PaddingVertical(10).Element(container => ComposeTable(container, table));
+                            column.Item().PaddingVertical(15).Element(container => ComposeTable(container, table));
                         }
                     });
                 }
@@ -119,18 +121,39 @@ namespace ReportHub.Common.Helper.GeneratorHelper
                     {
                         if (!string.IsNullOrEmpty(table.Title))
                         {
-                            column.Item().PaddingBottom(5).Text(table.Title)
-                                .FontSize(14).SemiBold();
+                            column.Item().PaddingBottom(8).Text(table.Title)
+                                .FontSize(14).SemiBold().FontColor(settings.Formatting.PrimaryColor);
                         }
 
                         column.Item().Table(tableBuilder =>
                         {
-                            // Define columns only once
+                            // Define columns with better width distribution
                             tableBuilder.ColumnsDefinition(columns =>
                             {
                                 for (int j = 0; j < table.Headers.Count; j++)
                                 {
-                                    columns.RelativeColumn();
+                                    // Adjust column widths based on table type and content
+                                    if (table.Headers.Count == 2)
+                                    {
+                                        if (j == 0)
+                                            columns.ConstantColumn(150); // Fixed width for labels/field names
+                                        else
+                                            columns.RelativeColumn(); // Flexible width for values
+                                    }
+                                    else if (table.Headers.Count >= 5) // Complex tables like charges
+                                    {
+                                        // More specific width allocation for complex tables
+                                        if (j == 0) columns.ConstantColumn(30);  // No
+                                        else if (j == 1) columns.RelativeColumn(3); // Description
+                                        else if (j == 2) columns.RelativeColumn(2); // Rate
+                                        else if (j == 3) columns.RelativeColumn(2); // Price  
+                                        else if (j == 4) columns.RelativeColumn(1); // Quantity
+                                        else columns.RelativeColumn(2); // Value
+                                    }
+                                    else
+                                    {
+                                        columns.RelativeColumn(); // Default for other tables
+                                    }
                                 }
                             });
 
@@ -141,7 +164,7 @@ namespace ReportHub.Common.Helper.GeneratorHelper
                                 {
                                     foreach (var headerText in table.Headers)
                                     {
-                                        header.Cell().Element(CellStyle).Text(headerText).SemiBold();
+                                        header.Cell().Element(HeaderCellStyle).Text(headerText).SemiBold();
                                     }
                                 });
                             }
@@ -154,16 +177,37 @@ namespace ReportHub.Common.Helper.GeneratorHelper
 
                                 for (int cellIndex = 0; cellIndex < row.Count && cellIndex < table.Headers.Count; cellIndex++)
                                 {
+                                    var cellText = row[cellIndex]?.ToString() ?? "";
                                     tableBuilder.Cell()
                                         .Element(cell => isAlternate ? cell.Background(settings.Formatting.SecondaryColor) : cell)
                                         .Element(CellStyle)
-                                        .Text(row[cellIndex]?.ToString() ?? "");
+                                        .Text(cellText)
+                                        .FontSize(10)
+                                        .LineHeight(1.2f);
                                 }
+                            }
+
+                            static IContainer HeaderCellStyle(IContainer container)
+                            {
+                                return container
+                                    .Border(1)
+                                    .BorderColor(Colors.Grey.Medium)
+                                    .Background(Colors.Grey.Lighten3)
+                                    .PaddingVertical(8)
+                                    .PaddingHorizontal(10)
+                                    .AlignCenter()
+                                    .AlignMiddle();
                             }
 
                             static IContainer CellStyle(IContainer container)
                             {
-                                return container.BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5);
+                                return container
+                                    .Border(1)
+                                    .BorderColor(Colors.Grey.Lighten2)
+                                    .PaddingVertical(6)
+                                    .PaddingHorizontal(8)
+                                    .AlignLeft()
+                                    .AlignMiddle();
                             }
                         });
                     });

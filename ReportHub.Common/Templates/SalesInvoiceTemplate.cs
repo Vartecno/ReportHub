@@ -1,21 +1,20 @@
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 using ReportHub.Objects.DTOs;
-using ReportHub.Objects.Interfaces;
 using System;
 
-namespace ReportHub.Objects.Templates
+namespace ReportHub.Common.Templates
 {
-    public class VenuesInvoiceTemplate : BaseReportTemplate
+    public class SalesInvoiceTemplate : BaseReportTemplate
     {
-        public override string TemplateId => "venues_invoice";
-        public override string DisplayName => "Venues Invoice";
-        public override string Description => "Template for generating Venues invoice reports with shipment details and charges";
-        public override Type[] SupportedDataTypes => new[] { typeof(VenuesInvoiceDataDTO) };
+        public override string TemplateId => "sales_invoice";
+        public override string DisplayName => "Sales Invoice";
+        public override string Description => "Template for generating Sales invoice reports with shipment details and charges";
+        public override Type[] SupportedDataTypes => new[] { typeof(SalesInvoiceDataDTO) };
 
         public override void GenerateContent(IContainer container, TemplateReportRequestDTO request)
         {
-            var data = ParseTemplateData<VenuesInvoiceDataDTO>(request.Data);
+            var data = ParseTemplateData<SalesInvoiceDataDTO>(request.Data);
             if (data == null) return;
             
             container.Column(column =>
@@ -218,7 +217,7 @@ namespace ReportHub.Objects.Templates
 
         public override object GetSampleData()
         {
-            return new VenuesInvoiceDataDTO
+            return new SalesInvoiceDataDTO
             {
                 Header = new InvoiceHeaderDTO
                 {

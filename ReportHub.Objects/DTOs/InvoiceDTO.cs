@@ -7,18 +7,6 @@ class InvoiceDTO
 
 public class BankWithDetailsDTO
 {
-    //public int BankId { get; set; }
-    //public int BankNumber { get; set; }
-    //public string BankPrimaryName { get; set; }
-    //public string BankSecondaryName { get; set; }
-    //public bool IsActive { get; set; }
-    //public string BranchPrimaryName { get; set; }
-    //public string BranchSecondaryName { get; set; }
-    //public string Address { get; set; }
-    //public string AccountBankNo { get; set; }
-    //public string SWIFT { get; set; }
-    //public string IBAN { get; set; }
-    //public int CurrencyId { get; set; }
     public int BankId { get; set; }
     public object BankNumber { get; set; }
     public string BankPrimaryName { get; set; }

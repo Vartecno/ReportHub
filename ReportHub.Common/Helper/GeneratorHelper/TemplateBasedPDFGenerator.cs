@@ -7,10 +7,7 @@ using ReportHub.Common.Services;
 
 namespace ReportHub.Common.Helper.GeneratorHelper
 {
-    /// <summary>
-    /// Template-based PDF generator that replaces the original hardcoded PDF_GeneratorHelper
-    /// Supports multiple report templates with dynamic branding
-    /// </summary>
+    
     public class TemplateBasedPDFGenerator : IFormatSpecificGenerator
     {
         private readonly ITemplateEngineService _templateEngineService;
@@ -28,10 +25,7 @@ namespace ReportHub.Common.Helper.GeneratorHelper
             QuestPDF.Settings.License = LicenseType.Community;
         }
 
-        /// <summary>
-        /// Generate PDF using template engine
-        /// Supports both legacy ReportData format and new TemplateReportRequestDTO format
-        /// </summary>
+        
         public async Task<byte[]> GenerateAsync(ReportSettings settings, ReportData data)
         {
             // Convert legacy format to template format if needed
@@ -53,10 +47,7 @@ namespace ReportHub.Common.Helper.GeneratorHelper
             return new MemoryStream(bytes);
         }
 
-        /// <summary>
-        /// Convert legacy ReportData format to new TemplateReportRequestDTO format
-        /// Maintains backward compatibility with existing API calls
-        /// </summary>
+        
         private TemplateReportRequestDTO ConvertToTemplateRequest(ReportSettings settings, ReportData data)
         {
             // Determine template type based on data structure or settings
@@ -83,7 +74,7 @@ namespace ReportHub.Common.Helper.GeneratorHelper
                 data.Tables.Any(t => t.Title.Contains("Shipment", StringComparison.OrdinalIgnoreCase)) ||
                 data.Variables.ContainsKey("invoiceNumber"))
             {
-                return "venues_invoice";
+                return "sales_invoice";
             }
             
             // Check for statement-related data
@@ -93,8 +84,8 @@ namespace ReportHub.Common.Helper.GeneratorHelper
                 return "account_statement";
             }
             
-            // Default to venues_invoice for backward compatibility
-            return "venues_invoice";
+            // Default to sales_invoice for backward compatibility
+            return "sales_invoice";
         }
 
         private ReportBrandingDTO CreateBrandingFromSettings(ReportSettings settings, ReportData data)
@@ -132,18 +123,18 @@ namespace ReportHub.Common.Helper.GeneratorHelper
         {
             switch (templateType)
             {
-                case "venues_invoice":
-                    return ConvertToVenuesInvoiceData(data);
+                case "sales_invoice":
+                    return ConvertToSalesInvoiceData(data);
                 case "account_statement":
                     return ConvertToAccountStatementData(data);
                 default:
-                    return ConvertToVenuesInvoiceData(data); // Default fallback
+                    return ConvertToSalesInvoiceData(data); // Default fallback
             }
         }
 
-        private VenuesInvoiceDataDTO ConvertToVenuesInvoiceData(ReportData data)
+        private SalesInvoiceDataDTO ConvertToSalesInvoiceData(ReportData data)
         {
-            var invoiceData = new VenuesInvoiceDataDTO();
+            var invoiceData = new SalesInvoiceDataDTO();
             
             // Extract header information
             invoiceData.Header = new InvoiceHeaderDTO

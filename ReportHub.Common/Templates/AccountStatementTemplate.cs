@@ -1,10 +1,8 @@
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 using ReportHub.Objects.DTOs;
-using ReportHub.Objects.Interfaces;
-using System;
 
-namespace ReportHub.Objects.Templates
+namespace ReportHub.Common.Templates
 {
     public class AccountStatementTemplate : BaseReportTemplate
     {

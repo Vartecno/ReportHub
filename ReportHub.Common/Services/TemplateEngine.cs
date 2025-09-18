@@ -9,10 +9,7 @@ using System.Collections.Concurrent;
 
 namespace ReportHub.Common.Services
 {
-    /// <summary>
-    /// Central template engine for managing and executing report templates
-    /// Supports 50+ report types with dynamic branding and data
-    /// </summary>
+    
     public class TemplateEngine : ITemplateEngine
     {
         private readonly ConcurrentDictionary<string, IReportTemplate> _templates = new();
@@ -24,10 +21,7 @@ namespace ReportHub.Common.Services
             QuestPDF.Settings.License = LicenseType.Community;
             _logger = logger;
         }
-
-        /// <summary>
-        /// Register a template in the engine
-        /// </summary>
+        
         public void RegisterTemplate(IReportTemplate template)
         {
             if (template == null)
@@ -45,26 +39,17 @@ namespace ReportHub.Common.Services
             _logger?.LogInformation("Template {TemplateId} ({DisplayName}) registered successfully", 
                 template.TemplateId, template.DisplayName);
         }
-
-        /// <summary>
-        /// Get all registered templates
-        /// </summary>
+        
         public Dictionary<string, IReportTemplate> GetRegisteredTemplates()
         {
             return new Dictionary<string, IReportTemplate>(_templates);
         }
-
-        /// <summary>
-        /// Check if a template is registered
-        /// </summary>
+        
         public bool IsTemplateRegistered(string templateId)
         {
             return !string.IsNullOrWhiteSpace(templateId) && _templates.ContainsKey(templateId);
         }
-
-        /// <summary>
-        /// Get a specific template by ID
-        /// </summary>
+        
         public IReportTemplate? GetTemplate(string templateId)
         {
             if (string.IsNullOrWhiteSpace(templateId))
@@ -73,10 +58,7 @@ namespace ReportHub.Common.Services
             _templates.TryGetValue(templateId, out var template);
             return template;
         }
-
-        /// <summary>
-        /// Generate a report using the template engine
-        /// </summary>
+        
         public async Task<ReportResult> GenerateReportAsync(TemplateReportRequestDTO request)
         {
             try
@@ -177,10 +159,7 @@ namespace ReportHub.Common.Services
                 };
             }
         }
-
-        /// <summary>
-        /// Validate a request against its template
-        /// </summary>
+        
         public TemplateValidationResult ValidateRequest(TemplateReportRequestDTO request)
         {
             var result = new TemplateValidationResult { IsValid = true };
@@ -216,10 +195,7 @@ namespace ReportHub.Common.Services
             result.IsValid = !result.Errors.Any();
             return result;
         }
-
-        /// <summary>
-        /// Get available templates with metadata
-        /// </summary>
+        
         public List<TemplateMetadata> GetAvailableTemplates()
         {
             return _templates.Values.Select(template => new TemplateMetadata
@@ -265,7 +241,7 @@ namespace ReportHub.Common.Services
                 tags.AddRange(new[] { "billing", "invoice", "financial" });
             if (templateId.Contains("statement", StringComparison.OrdinalIgnoreCase))
                 tags.AddRange(new[] { "statement", "accounting", "financial" });
-            if (templateId.Contains("venues", StringComparison.OrdinalIgnoreCase))
+            if (templateId.Contains("sales", StringComparison.OrdinalIgnoreCase))
                 tags.AddRange(new[] { "logistics", "shipping" });
             if (templateId.Contains("account", StringComparison.OrdinalIgnoreCase))
                 tags.AddRange(new[] { "accounting", "transactions" });

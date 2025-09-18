@@ -7,15 +7,7 @@ using System.Threading.Tasks;
 
 namespace ReportHub.Objects.DTOs
 {
-    public class ReportDataDTO
-    {
-        public CompanyInfo CompanyInfo { get; set; } = new();
-        public List<OrderLeadDetailsDTO> OrderLeadDetails { get; set; } = new();
-        public List<OrderProfitResultDTO> OrderProfitResults { get; set; } = new();
-        public InvoiceResponseDTO InvoiceData { get; set; } = new();
-        public List<ChargesDTO> Charges { get; set; } = new();
-        public Dictionary<string, object> AdditionalData { get; set; } = new();
-    }
+
     public class OrderLeadDetailsDTO
     {
         public int OrderLeadID { get; set; }

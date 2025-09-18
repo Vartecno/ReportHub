@@ -8,7 +8,7 @@ namespace ReportHub.Common.Base
         public static IServiceCollection AddReportGeneration(this IServiceCollection services)
         {
            
-            services.AddTransient<IFormatSpecificGenerator, PDF_GeneratorHelper>();
+     
             services.AddTransient<IFormatSpecificGenerator, Word_GeneratorHelper>();
             services.AddTransient<IFormatSpecificGenerator, Excel_GeneratorHelper>();
 

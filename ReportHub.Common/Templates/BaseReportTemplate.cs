@@ -7,7 +7,7 @@ using System.Globalization;
 using System.Text.Json;
 using Colors = QuestPDF.Helpers.Colors;
 
-namespace ReportHub.Objects.Templates
+namespace ReportHub.Common.Templates
 {
     /// <summary>
     /// Abstract base class for all report templates

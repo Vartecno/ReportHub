@@ -42,8 +42,7 @@ namespace ReportHub.Controllers
 
                 _logger.LogInformation("Generating {Format} report using unified endpoint", request.Format);
 
-                // Handle template-based generation
-                if (!string.IsNullOrEmpty(request.ReportType))
+                 if (!string.IsNullOrEmpty(request.ReportType))
                 {
                     var templateRequest = new TemplateReportRequestDTO
                     {
@@ -53,23 +52,20 @@ namespace ReportHub.Controllers
                         Configuration = request.Configuration ?? new ReportConfigurationDTO { Title = "Report" }
                     };
 
-                    // Validate template request
-                    var validation = _templateEngineService.ValidateTemplateRequest(templateRequest);
+                     var validation = _templateEngineService.ValidateTemplateRequest(templateRequest);
                     if (!validation.IsValid)
                     {
                         return BadRequest(new { errors = validation.Errors, warnings = validation.Warnings });
                     }
 
-                    // For template-based generation, use template engine which handles format internally
-                    var templateResult = await _templateEngineService.GenerateTemplateReportAsync(templateRequest);
+                     var templateResult = await _templateEngineService.GenerateTemplateReportAsync(templateRequest);
                     
                     if (!templateResult.Success)
                     {
                         return BadRequest(new { errors = templateResult.Errors });
                     }
 
-                    // If format is not PDF, convert the result
-                    if (request.Format != ReportFormat.PDF)
+                     if (request.Format != ReportFormat.PDF)
                     {
                         var convertedResult = await ConvertReportFormat(templateResult, request.Format);
                         if (!convertedResult.Success)
@@ -83,8 +79,7 @@ namespace ReportHub.Controllers
                 }
                 else
                 {
-                    // Handle legacy format-based generation
-                    var legacySettings = request.Settings ?? new ReportSettings();
+                     var legacySettings = request.Settings ?? new ReportSettings();
                     var legacyData = request.LegacyData ?? new ReportData();
                     
                     var result = await _reportGenerator.GenerateReportAsync(legacySettings, legacyData, request.Format);

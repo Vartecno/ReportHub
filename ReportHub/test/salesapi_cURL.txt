@@ -1,0 +1,89 @@
+curl --location 'https://localhost/api/report/sales-invoice' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer YOUR_TOKEN_HERE' \
+--header 'Cookie: SecurityPlatformRefreshCookie=vvNGCRBwNUnQEO8okBwB5sC0%2BVRKldKIad7rAzHyBRc%3D; SecurityPlatformTokenCookie=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjY2IiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZSI6ImNsb3VkLmFkbWluIiwiVXNlcklkIjoiNjYiLCJOYW1lIjoiY2xvdWQuYWRtaW4iLCJFbWFpbCI6ImEuYWJ1aXJtYWlzQGVza2FkZW5pYS5jb20iLCJQaG9uZU51bWJlciI6Ijk2Mjc4MTY0ODc5NCIsIlVzZXJuYW1lIjoiY2xvdWQuYWRtaW4iLCJVc2VyVHlwZSI6IkN1c3RvbWVyIiwiQ3VycmVuY3lDdWx0dXJlSWQiOiIiLCJTZXNzaW9uSWQiOiJmODU1ZjliYTFlNTg0NjE2ODliZDJhNTU2ODkyYmM5ZSIsIlVzZXJMb2dpblR5cGUiOiJVc2VybmFtZSIsIlVzZXJSb2xlcyI6IjEsOSIsIkJyYW5jaElkIjoiMSIsIk9yZ2FuaXphdGlvbklkIjoiMiIsIkJyYW5jaE5hbWUiOiJNYWluIEJyYW5jaCIsIk9yZ2FuaXphdGlvbk5hbWUiOiJFc2thZGVuaWEiLCJEYXRlT2ZCaXJ0aCI6IjIvMTAvMTk4NiAxMjowMDowMCBBTSArMDA6MDAiLCJleHAiOjE3NTgxMTUzOTksImlzcyI6ImxvY2FsaG9zdCJ9.RuVH1h1YwfCPC24CcN-kUesDoYRbuc1W53EZcBIfigw; cookiemenu=%5B7%2C24%2C25%2C26%2C27%2C30%5D' \
+--data-raw '{
+    "format": "PDF",
+    "branding": {
+      "company": {
+        "name": "Your Company Ltd",
+        "address": "123 Business Street, Business City, BC 12345",
+        "phone": "+1-555-0123",
+        "email": "billing@yourcompany.com",
+        "website": "www.yourcompany.com",
+        "taxNumber": "TAX123456",
+        "registrationNumber": "REG789012"
+      },
+      "colors": {
+        "primary": "#0066CC",
+        "secondary": "#F0F0F0",
+        "accent": "#FF6600"
+      }
+    },
+    "data": {
+      "header": {
+        "invoiceNumber": "INV-2025-001",
+        "date": "2025-09-18T00:00:00Z",
+        "reference": "ORDER-12345",
+        "customerName": "ABC Corporation Ltd",
+        "customerAddress": "456 Client Avenue, Client City, CC 67890"
+      },
+      "shipment": {
+        "service": "Air Freight Express",
+        "origin": "Amman, Jordan",
+        "destination": "Dubai, UAE",
+        "awb": "176-12345678",
+        "weight": 150.5,
+        "volume": "3.2 CBM"
+      },
+      "charges": [
+        {
+          "sequence": 1,
+          "description": "Air Freight Charges",
+          "ratePerUnit": 8.50,
+          "quantity": 150.5,
+          "value": 1279.25,
+          "currency": "USD"
+        },
+        {
+          "sequence": 2,
+          "description": "Documentation Fee",
+          "ratePerUnit": 50.00,
+          "quantity": 1,
+          "value": 50.00,
+          "currency": "USD"
+        },
+        {
+          "sequence": 3,
+          "description": "Handling Charges",
+          "ratePerUnit": 25.00,
+          "quantity": 1,
+          "value": 25.00,
+          "currency": "USD"
+        }
+      ],
+      "total": {
+        "subtotal": 1354.25,
+        "tax": 135.43,
+        "total": 1489.68,
+        "currency": "USD"
+      },
+      "bankAccounts": [
+        {
+          "bankName": "Jordan Commercial Bank",
+          "accountName": "Your Company Ltd",
+          "accountNumber": "1234567890",
+          "iban": "JO15CBJO0010000000000131000302",
+          "swift": "CBJOJOAX",
+          "currency": "USD"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Sales Invoice",
+      "includePageNumbers": true,
+      "includeHeader": true,
+      "includeFooter": true,
+      "culture": "en-US"
+    }
+  }'

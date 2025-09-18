@@ -5,6 +5,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="ReportGenerationService\**" />
+    <Compile Remove="Report\**" />
+    <Content Remove="ReportGenerationService\**" />
+    <Content Remove="Report\**" />
+    <EmbeddedResource Remove="ReportGenerationService\**" />
+    <EmbeddedResource Remove="Report\**" />
+    <None Remove="ReportGenerationService\**" />
+    <None Remove="Report\**" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Remove="wwwroot\XMLConfiguration\FawtaraXML-old-ESKA.xml" />
     <Content Remove="wwwroot\XMLConfiguration\FawtaraXML.xml" />
   </ItemGroup>
@@ -26,11 +36,6 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.2" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="ReportGenerationService\" />
-    <Folder Include="Report\Logistics\" />
-    <Folder Include="Report\Accounting\" />
-    <Folder Include="Report\Core\" />
-    <Folder Include="Report\VarFlow-SMS\" />
     <Folder Include="wwwroot\Reports\" />
   </ItemGroup>
   <ItemGroup>
